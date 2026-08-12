@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi SIP Puskesmas Kemiling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <div id="loginView" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 p-4 overflow-y-auto">
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-fadeIn my-auto">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-8 text-white text-center relative">
+                <div class="w-16 h-16 bg-white/15 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold mb-3 shadow-inner">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tight">SIP Puskesmas Kemiling</h1>
+                <p class="text-xs text-emerald-100 mt-1">Sistem Informasi Surat Izin Praktik Tenaga Kesehatan</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="p-8 space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Pilih Peran Masuk</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="roleBtnAdmin" onclick="setLoginRole('admin')" class="py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-emerald-600 bg-emerald-50 text-emerald-700 shadow-xs">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Admin Puskesmas</span>
+                        </button>
+                        <button type="button" id="roleBtnNakes" onclick="setLoginRole('nakes')" class="py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300">
+                            <i class="fa-solid fa-user-doctor"></i>
+                            <span>Tenaga Kesehatan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Email / Akun</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                        </span>
+                        <input type="email" id="loginEmail" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition" placeholder="admin@puskesmaskemiling.go.id" value="admin@puskesmaskemiling.go.id">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition" placeholder="••••••••" value="password123">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center space-x-2">
+                    <span>Masuk ke Sistem</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+
+                <div class="text-center pt-2">
+                    <button type="button" onclick="openRegisterModal()" class="text-xs font-bold text-emerald-700 hover:underline">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Belum punya akun? Daftar Akun Baru
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainAppView" class="hidden flex-1 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-xl flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
+                        <i class="fa-solid fa-hospital-user"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-slate-900 leading-tight">SIP Puskesmas Kemiling</h2>
+                        <p class="text-[11px] text-slate-500">UPT Puskesmas Kemiling Kota Bandar Lampung</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex flex-col text-right">
+                        <span id="headerUserName" class="text-xs font-bold text-slate-800">Administrator Puskesmas</span>
+                        <span id="headerUserRole" class="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-semibold inline-block mt-0.5">Admin Utama</span>
+                    </div>
+                    <button onclick="handleLogout()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-rose-200">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Body -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+            
+            <!-- Statistics Banner (Hidden for Nakes session) -->
+            <div id="statsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Nakes Terdaftar</p>
+                        <h3 id="statTotalNakes" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">SIP Aktif</p>
+                        <h3 id="statActiveSip" class="text-2xl font-extrabold text-emerald-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-file-shield"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Menunggu Validasi</p>
+                        <h3 id="statPendingSip" class="text-2xl font-extrabold text-amber-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Kedaluwarsa</p>
+                        <h3 id="statExpiredSip" class="text-2xl font-extrabold text-rose-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAKES PERSONAL PROFILE SHOWCASE (Visible only for Nakes session) -->
+            <div id="nakesProfileHero" class="hidden bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 md:w-20 md:h-20 bg-white/15 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl font-extrabold shadow-inner border border-white/20 shrink-0">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="px-2.5 py-0.5 bg-emerald-500/30 text-emerald-200 text-[10px] font-extrabold tracking-wider uppercase rounded-full border border-emerald-400/30 inline-block">Profil Tenaga Kesehatan Aktif</span>
+                            <h2 id="heroNakesName" class="text-xl md:text-2xl font-black">Dr. Nama Nakes</h2>
+                            <p id="heroNakesProfession" class="text-xs text-emerald-100 font-medium">Dokter Umum • UPT Puskesmas Kemiling</p>
+                            <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
+                                <span class="bg-black/20 px-3 py-1 rounded-xl border border-white/10 font-mono" id="heroNakesStr">STR: -</span>
+                                <span id="heroNakesStrStatus" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">STR Aktif (Sah)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button onclick="openAddModal()" class="px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-900 rounded-2xl text-xs font-bold transition shadow-lg flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <span>Ajukan / Perpanjang SIP</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Card Container -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <!-- Toolbar & Tabs -->
+                <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50/50">
+                    <div id="adminTabNav" class="flex flex-wrap items-center gap-2">
+                        <button onclick="switchAdminTab('semua')" id="tabBtn-semua" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-sm">Semua Nakes</button>
+                        <button onclick="switchAdminTab('aktif')" id="tabBtn-aktif" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">SIP Aktif</button>
+                        <button onclick="switchAdminTab('menunggu')" id="tabBtn-menunggu" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Menunggu Review</button>
+                        <button onclick="switchAdminTab('kedaluwarsa')" id="tabBtn-kedaluwarsa" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Kedaluwarsa</button>
+                        <button onclick="switchAdminTab('users')" id="tabBtn-users" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"><i class="fa-solid fa-users-gear mr-1"></i> Manajemen User & Sesi</button>
+                    </div>
+
+                    <div id="sectionTitleForNakes" class="hidden text-xs font-bold text-slate-700 flex items-center space-x-2">
+                        <i class="fa-solid fa-folder-open text-emerald-600"></i>
+                        <span>Arsip & Dokumen SIP Pribadi Anda</span>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <div id="searchBoxContainer" class="relative flex-1 md:w-64">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-search text-xs"></i>
+                            </span>
+                            <input type="text" id="searchInput" oninput="filterNakesTable()" class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Cari nama, STR, atau profesi...">
+                        </div>
+                        <button onclick="openAddModal()" id="addNewSipBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center space-x-2 shrink-0">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tambah Data SIP</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table View for SIP Data -->
+                <div id="sipTableContainer" class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr id="tableHeaderRow" class="bg-slate-100/70 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3.5 px-6">Tenaga Kesehatan</th>
+                                <th class="py-3.5 px-4">Profesi & Status STR</th>
+                                <th class="py-3.5 px-4">Nomor SIP & Instansi</th>
+                                <th class="py-3.5 px-4">Masa Berlaku SIP</th>
+                                <th class="py-3.5 px-4">Status & Dokumen</th>
+                                <th class="py-3.5 px-6 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nakesTableBody" class="divide-y divide-slate-100">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Document Preview & Reviewer for Admin -->
+    <div id="docReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-2xl overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 id="modalDocTitle" class="text-base font-bold">Review Berkas SIP</h3>
+                        <p id="modalDocSub" class="text-xs text-emerald-100">Validasi dokumen persyaratan tenaga kesehatan</p>
+                    </div>
+                </div>
+                <button onclick="closeDocReviewModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Nama Pemohon</span>
+                            <span id="previewName" class="font-bold text-slate-800 text-sm">-</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Profesi</span>
+                            <span id="previewProfession" class="font-bold text-slate-800 text-sm">-</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Nomor STR</span>
+                            <span id="previewStr" class="font-mono font-medium text-slate-700">-</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Nomor SIP</span>
+                            <span id="previewSip" class="font-mono font-medium text-slate-700">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 text-slate-200 p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 text-center">
+                    <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl font-bold border border-emerald-500/30">
+                        <i class="fa-solid fa-file-contract"></i>
+                    </div>
+                    <div>
+                        <h4 id="previewFileName" class="text-sm font-bold text-white">Scan_Dokumen_SIP.pdf</h4>
+                        <p class="text-xs text-slate-400 mt-1">Dokumen resmi terlampir dalam arsip digital Puskesmas Kemiling.</p>
+                    </div>
+                    <button onclick="downloadActiveDocument()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-md">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Unduh Berkas Lampiran</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
+                <button type="button" onclick="closeDocReviewModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">Tutup</button>
+                <div id="modalReviewActions" class="flex items-center space-x-3">
+                    <button type="button" onclick="rejectDocumentFromModal()" class="px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-xmark"></i>
+                        <span>Tolak / Perbaikan</span>
+                    </button>
+                    <button type="button" onclick="approveDocumentFromModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Validasi & Setujui SIP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registration / Pendaftaran Akun Baru -->
+    <div id="registerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold">Pendaftaran Akun Baru</h3>
+                        <p class="text-xs text-emerald-100">Pendaftaran Admin atau Tenaga Kesehatan</p>
+                    </div>
+                </div>
+                <button onclick="closeRegisterModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pilih Peran Akun</label>
+                    <select id="regRole" onchange="toggleRegProfessionField()" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="nakes">Tenaga Kesehatan / Staf Puskesmas</option>
+                        <option value="admin">Administrator Puskesmas</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nama Lengkap & Gelar</label>
+                    <input type="text" id="regName" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Contoh: Dr. Anita Sari, Sp.A">
+                </div>
+                <div id="regProfessionGroup">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Profesi / Keahlian Nakes & Non-Nakes</label>
+                    <select id="regProfession" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="Dokter Umum">Dokter Umum</option>
+                        <option value="Dokter Gigi">Dokter Gigi</option>
+                        <option value="Perawat">Perawat</option>
+                        <option value="Bidan">Bidan</option>
+                        <option value="Apoteker / Tenaga Teknis Kefarmasian">Apoteker / Tenaga Teknis Kefarmasian</option>
+                        <option value="Ahli Teknologi Laboratorium Medik (ATLM)">Ahli Teknologi Laboratorium Medik (ATLM)</option>
+                        <option value="Tenaga Promosi Kesehatan (Promkes)">Tenaga Promosi Kesehatan (Promkes)</option>
+                        <option value="Tenaga Kesehatan Lingkungan (Kesling)">Tenaga Kesehatan Lingkungan (Kesling)</option>
+                        <option value="Tenaga Gizi (Nutrisionis / Dietisien)">Tenaga Gizi (Nutrisionis / Dietisien)</option>
+                        <option value="Perekam Medis & Informasi Kesehatan">Perekam Medis & Informasi Kesehatan</option>
+                        <option value="Tenaga Administrasi & Keuangan (Tata Usaha)">Tenaga Administrasi & Keuangan (Tata Usaha)</option>
+                        <option value="Staf Umum / Pendukung Layanan">Staf Umum / Pendukung Layanan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email Resmi (Untuk Login)</label>
+                    <input type="email" id="regEmail" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="anita.sari@nakes.id">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Kata Sandi (Password)</label>
+                    <input type="password" id="regPassword" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="••••••••" value="password123">
+                </div>
+                <div class="pt-2 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeRegisterModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition">Daftarkan Akun</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit SIP -->
+    <div id="sipModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-file-medical"></i>
+                    </div>
+                    <div>
+                        <h3 id="sipModalTitle" class="text-base font-bold">Tambah Data SIP Baru</h3>
+                        <p class="text-xs text-emerald-100">Pencatatan Surat Izin Praktik Tenaga Kesehatan</p>
+                    </div>
+                </div>
+                <button onclick="closeSipModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="sipForm" onsubmit="handleSipFormSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="editNakesId">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nama Lengkap & Gelar</label>
+                    <input type="text" id="inputName" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Contoh: dr. H. Ahmad Fauzi">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nomor STR</label>
+                        <input type="text" id="inputStr" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="STR-123456789">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Profesi Nakes / Non-Nakes</label>
+                        <select id="inputProfession" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Dokter Umum">Dokter Umum</option>
+                            <option value="Dokter Gigi">Dokter Gigi</option>
+                            <option value="Perawat">Perawat</option>
+                            <option value="Bidan">Bidan</option>
+                            <option value="Apoteker / Tenaga Teknis Kefarmasian">Apoteker / Tenaga Teknis Kefarmasian</option>
+                            <option value="Ahli Teknologi Laboratorium Medik (ATLM)">Ahli Teknologi Laboratorium Medik (ATLM)</option>
+                            <option value="Tenaga Promosi Kesehatan (Promkes)">Tenaga Promosi Kesehatan (Promkes)</option>
+                            <option value="Tenaga Kesehatan Lingkungan (Kesling)">Tenaga Kesehatan Lingkungan (Kesling)</option>
+                            <option value="Tenaga Gizi (Nutrisionis / Dietisien)">Tenaga Gizi (Nutrisionis / Dietisien)</option>
+                            <option value="Perekam Medis & Informasi Kesehatan">Perekam Medis & Informasi Kesehatan</option>
+                            <option value="Tenaga Administrasi & Keuangan (Tata Usaha)">Tenaga Administrasi & Keuangan (Tata Usaha)</option>
+                            <option value="Staf Umum / Pendukung Layanan">Staf Umum / Pendukung Layanan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nomor SIP</label>
+                        <input type="text" id="inputSipNo" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="446/012-SIP/PKM-KML/2026">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Masa Berlaku SIP</label>
+                        <input type="date" id="inputExpiry" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email Kontak</label>
+                        <input type="email" id="inputEmail" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="nakes@puskesmaskemiling.go.id">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Unggah Berkas PDF (Lampiran SIP)</label>
+                        <input type="file" id="inputFileUpload" accept=".pdf,.doc,.docx" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeSipModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition">Simpan Data SIP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Notification Modal -->
+    <div id="appModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-sm overflow-hidden animate-fadeIn p-6 text-center space-y-4">
+            <div id="modalIconBox" class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 id="modalTitle" class="text-base font-bold text-slate-900">Berhasil</h3>
+                <p id="modalMessage" class="text-xs text-slate-500 mt-1">Pesan notifikasi sistem.</p>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        let nakesData = [];
+        let registeredUsers = [];
+
+        let currentSession = null;
+        let currentAdminTab = 'semua';
+        let activeReviewIndex = null;
+        let loginRoleSelected = 'admin';
+
+        window.onload = function() {
+            renderNakesTable();
+            updateStatistics();
+        };
+
+        function setLoginRole(role) {
+            loginRoleSelected = role;
+            var btnAdmin = document.getElementById('roleBtnAdmin');
+            var btnNakes = document.getElementById('roleBtnNakes');
+            var emailInput = document.getElementById('loginEmail');
+
+            if (role === 'admin') {
+                btnAdmin.className = "py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-emerald-600 bg-emerald-50 text-emerald-700 shadow-xs";
+                btnNakes.className = "py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300";
+                emailInput.value = "admin@puskesmaskemiling.go.id";
+            } else {
+                btnNakes.className = "py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-emerald-600 bg-emerald-50 text-emerald-700 shadow-xs";
+                btnAdmin.className = "py-3 px-4 rounded-xl text-xs font-bold border-2 transition flex items-center justify-center space-x-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300";
+                emailInput.value = "nakes@puskesmaskemiling.go.id";
+            }
+        }
+
+        function openRegisterModal() {
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+
+        function toggleRegProfessionField() {
+            var role = document.getElementById('regRole').value;
+            var group = document.getElementById('regProfessionGroup');
+            if (role === 'admin') {
+                group.style.display = 'none';
+            } else {
+                group.style.display = 'block';
+            }
+        }
+
+        function handleRegisterSubmit(event) {
+            event.preventDefault();
+            var role = document.getElementById('regRole').value;
+            var name = document.getElementById('regName').value.trim();
+            var profession = document.getElementById('regProfession').value;
+            var email = document.getElementById('regEmail').value.trim();
+            var password = document.getElementById('regPassword').value.trim();
+
+            if (!name || !email || !password) {
+                showModal('Pendaftaran Gagal', 'Semua kolom wajib diisi dengan benar.', 'warning');
+                return;
+            }
+
+            var existingUser = registeredUsers.find(function(u) { return u.email.toLowerCase() === email.toLowerCase(); });
+            if (existingUser) {
+                showModal('Pendaftaran Gagal', 'Email tersebut sudah terdaftar di dalam sistem.', 'warning');
+                return;
+            }
+
+            var nowStr = "12 Agustus 2026, " + String(new Date().getHours()).padStart(2, '0') + ":" + String(new Date().getMinutes()).padStart(2, '0') + " WIB";
+
+            registeredUsers.push({
+                id: registeredUsers.length > 0 ? Math.max.apply(null, registeredUsers.map(function(u) { return u.id; })) + 1 : 1,
+                name: name,
+                email: email,
+                role: role,
+                status: 'Tidak Aktif',
+                lastLogin: nowStr
+            });
+
+            if (role === 'nakes') {
+                nakesData.push({
+                    id: nakesData.length > 0 ? Math.max.apply(null, nakesData.map(function(n) { return n.id; })) + 1 : 1,
+                    name: name,
+                    str: 'STR-' + Math.floor(1000000000 + Math.random() * 9000000000),
+                    strStatus: "Aktif (Sah)",
+                    profession: profession,
+                    sipNo: '446/' + (50 + nakesData.length) + '-SIP/PKM-KML/2026',
+                    hospital: 'UPT Puskesmas Kemiling',
+                    expiry: '2029-12-31',
+                    status: 'Menunggu Verifikasi',
+                    email: email,
+                    fileName: 'Dokumen_SIP_' + name.replace(/\s+/g, '_') + '.pdf',
+                    docStatus: 'Menunggu Review'
+                });
+            }
+
+            closeRegisterModal();
+            showModal('Pendaftaran Berhasil', 'Akun berhasil didaftarkan. Silakan masuk menggunakan email dan kata sandi Anda.', 'success');
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            var password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                showModal('Peringatan Login', 'Mohon isi email dan kata sandi.', 'warning');
+                return;
+            }
+
+            var userRecord = registeredUsers.find(function(u) { return u.email.toLowerCase() === email.toLowerCase(); });
+            
+            if (loginRoleSelected === 'admin') {
+                if (!userRecord) {
+                    userRecord = {
+                        id: registeredUsers.length + 1,
+                        name: "Administrator Puskesmas",
+                        email: email,
+                        role: "admin",
+                        status: "Aktif",
+                        lastLogin: "Baru saja"
+                    };
+                    registeredUsers.push(userRecord);
+                }
+                currentSession = {
+                    role: 'admin',
+                    name: userRecord.name,
+                    identifier: email
+                };
+            } else {
+                if (!userRecord) {
+                    userRecord = {
+                        id: registeredUsers.length + 1,
+                        name: "Dr. Nakes Mandiri",
+                        email: email,
+                        role: "nakes",
+                        status: "Aktif",
+                        lastLogin: "Baru saja"
+                    };
+                    registeredUsers.push(userRecord);
+
+                    nakesData.push({
+                        id: nakesData.length > 0 ? Math.max.apply(null, nakesData.map(function(n) { return n.id; })) + 1 : 1,
+                        name: "Dr. Nakes Mandiri",
+                        str: "STR-" + Math.floor(1000000000 + Math.random() * 9000000000),
+                        strStatus: "Aktif (Sah)",
+                        profession: "Dokter Umum",
+                        sipNo: "446/" + (10 + nakesData.length) + "-SIP/PKM-KML/2026",
+                        hospital: "UPT Puskesmas Kemiling",
+                        expiry: "2029-12-31",
+                        status: "Aktif",
+                        email: email,
+                        fileName: "Dokumen_SIP_Mandiri.pdf",
+                        docStatus: "Tervalidasi"
+                    });
+                }
+
+                currentSession = {
+                    role: 'nakes',
+                    name: userRecord.name,
+                    identifier: email,
+                    profession: 'Dokter Umum',
+                    str: 'STR-' + Math.floor(1000000000 + Math.random() * 9000000000),
+                    strStatus: 'Aktif (Sah)'
+                };
+            }
+
+            if (userRecord) {
+                userRecord.status = 'Aktif';
+                userRecord.lastLogin = "12 Agustus 2026, " + String(new Date().getHours()).padStart(2, '0') + ":" + String(new Date().getMinutes()).padStart(2, '0') + " WIB";
+            }
+
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('mainAppView').classList.remove('hidden');
+
+            document.getElementById('headerUserName').textContent = currentSession.name;
+            document.getElementById('headerUserRole').textContent = currentSession.role === 'admin' ? 'Admin Utama' : (currentSession.profession || 'Tenaga Kesehatan');
+
+            var addBtn = document.getElementById('addNewSipBtn');
+            var adminTabNav = document.getElementById('adminTabNav');
+            var sectionTitleForNakes = document.getElementById('sectionTitleForNakes');
+            var nakesProfileHero = document.getElementById('nakesProfileHero');
+            var statsContainer = document.getElementById('statsContainer');
+            
+            if (currentSession.role === 'nakes') {
+                addBtn.innerHTML = '<i class="fa-solid fa-upload mr-1"></i><span>Ajukan / Perpanjang SIP</span>';
+                if (adminTabNav) adminTabNav.style.display = 'none';
+                if (sectionTitleForNakes) sectionTitleForNakes.classList.remove('hidden');
+                if (statsContainer) statsContainer.classList.add('hidden');
+                if (nakesProfileHero) {
+                    nakesProfileHero.classList.remove('hidden');
+                    document.getElementById('heroNakesName').textContent = currentSession.name;
+                    document.getElementById('heroNakesProfession').textContent = (currentSession.profession || 'Tenaga Kesehatan') + " • UPT Puskesmas Kemiling";
+                    document.getElementById('heroNakesStr').textContent = "STR: " + currentSession.str;
+                    document.getElementById('heroNakesStrStatus').textContent = "STR " + currentSession.strStatus;
+                }
+            } else {
+                addBtn.innerHTML = '<i class="fa-solid fa-plus mr-1"></i><span>Tambah Data SIP</span>';
+                if (adminTabNav) adminTabNav.style.display = 'flex';
+                if (sectionTitleForNakes) sectionTitleForNakes.classList.add('hidden');
+                if (statsContainer) statsContainer.classList.remove('grid');
+                if (statsContainer) statsContainer.classList.remove('hidden');
+                if (statsContainer) statsContainer.style.display = 'grid';
+                if (nakesProfileHero) nakesProfileHero.classList.add('hidden');
+                switchAdminTab('semua');
+            }
+
+            renderNakesTable();
+            updateStatistics();
+        }
+
+        function handleLogout() {
+            if (currentSession) {
+                var uRec = registeredUsers.find(function(u) { return u.email.toLowerCase() === currentSession.identifier.toLowerCase(); });
+                if (uRec) uRec.status = 'Tidak Aktif';
+            }
+            currentSession = null;
+            document.getElementById('mainAppView').classList.add('hidden');
+            document.getElementById('loginView').classList.remove('hidden');
+            document.getElementById('loginPassword').value = 'password123';
+            document.getElementById('loginEmail').value = 'admin@puskesmaskemiling.go.id';
+        }
+
+        function switchAdminTab(tabKey) {
+            if (currentSession && currentSession.role === 'nakes') return;
+
+            currentAdminTab = tabKey;
+            var tabs = ['semua', 'aktif', 'menunggu', 'kedaluwarsa', 'users'];
+            
+            tabs.forEach(function(t) {
+                var btn = document.getElementById('tabBtn-' + t);
+                if (!btn) return;
+                if (t === tabKey) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-sm";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+                }
+            });
+
+            var searchContainer = document.getElementById('searchBoxContainer');
+            var addNewBtn = document.getElementById('addNewSipBtn');
+            var tableHeader = document.getElementById('tableHeaderRow');
+
+            if (tabKey === 'users') {
+                if (searchContainer) searchContainer.style.display = 'none';
+                if (addNewBtn) addNewBtn.style.display = 'none';
+                if (tableHeader) {
+                    tableHeader.innerHTML = `
+                        <th class="py-3.5 px-6">Nama Pengguna & Akun</th>
+                        <th class="py-3.5 px-4">Peran (Role)</th>
+                        <th class="py-3.5 px-4">Status Sesi</th>
+                        <th class="py-3.5 px-4">Waktu & Tanggal Aktivitas Terakhir</th>
+                        <th class="py-3.5 px-6 text-right">Kelola Akun</th>
+                    `;
+                }
+            } else {
+                if (searchContainer) searchContainer.style.display = 'block';
+                if (addNewBtn) addNewBtn.style.display = 'flex';
+                if (tableHeader) {
+                    tableHeader.innerHTML = `
+                        <th class="py-3.5 px-6">Tenaga Kesehatan</th>
+                        <th class="py-3.5 px-4">Profesi & Status STR</th>
+                        <th class="py-3.5 px-4">Nomor SIP & Instansi</th>
+                        <th class="py-3.5 px-4">Masa Berlaku SIP</th>
+                        <th class="py-3.5 px-4">Status & Dokumen</th>
+                        <th class="py-3.5 px-6 text-right">Aksi</th>
+                    `;
+                }
+            }
+
+            renderNakesTable();
+        }
+
+        function renderNakesTable() {
+            var tbody = document.getElementById('nakesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (currentSession && currentSession.role === 'admin' && currentAdminTab === 'users') {
+                renderUserManagementTable(tbody);
+                return;
+            }
+
+            var list = [...nakesData];
+
+            if (currentSession && currentSession.role === 'nakes') {
+                list = list.filter(function(item) {
+                    return item.email.toLowerCase() === currentSession.identifier.toLowerCase();
+                });
+            } else if (currentAdminTab !== 'semua') {
+                list = list.filter(function(item) {
+                    if (currentAdminTab === 'aktif') return item.status === 'Aktif';
+                    if (currentAdminTab === 'menunggu') return item.status === 'Menunggu Verifikasi';
+                    if (currentAdminTab === 'kedaluwarsa') return item.status === 'Kedaluwarsa';
+                    return true;
+                });
+            }
+
+            var searchVal = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase() : '';
+            if (searchVal) {
+                list = list.filter(function(item) {
+                    return item.name.toLowerCase().includes(searchVal) ||
+                           item.str.toLowerCase().includes(searchVal) ||
+                           item.profession.toLowerCase().includes(searchVal);
+                });
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-12 text-center text-slate-400">Tidak ada data Surat Izin Praktik (SIP) yang ditemukan.</td></tr>';
+                return;
+            }
+
+            list.forEach(function(item) {
+                var statusBadge = '';
+                if (item.status === 'Aktif') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Aktif</span>';
+                } else if (item.status === 'Menunggu Verifikasi') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Menunggu Verifikasi</span>';
+                } else {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Kedaluwarsa</span>';
+                }
+
+                var strBadgeText = item.strStatus || "Aktif (Sah)";
+                var strBadgeClass = strBadgeText.includes('Aktif') ? 'text-teal-600 bg-teal-50 border-teal-200' : 'text-amber-600 bg-amber-50 border-amber-200';
+                var strBadge = '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold border ' + strBadgeClass + ' inline-flex items-center space-x-1 mt-0.5"><i class="fa-solid fa-id-card"></i><span>STR: ' + strBadgeText + '</span></span>';
+
+                var docBadge = '';
+                if (item.docStatus === 'Tervalidasi') {
+                    docBadge = '<span class="text-[10px] font-semibold text-teal-600 flex items-center space-x-1 mt-1"><i class="fa-solid fa-circle-check"></i><span>Tervalidasi</span></span>';
+                } else if (item.docStatus === 'Menunggu Review') {
+                    docBadge = '<span class="text-[10px] font-semibold text-amber-600 flex items-center space-x-1 mt-1"><i class="fa-solid fa-clock"></i><span>Review Berkas</span></span>';
+                } else {
+                    docBadge = '<span class="text-[10px] font-semibold text-rose-600 flex items-center space-x-1 mt-1"><i class="fa-solid fa-triangle-exclamation"></i><span>Perlu Perbaikan</span></span>';
+                }
+
+                var row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50 transition';
+                row.innerHTML = `
+                    <td class="py-4 px-6">
+                        <div class="font-bold text-slate-900">` + item.name + `</div>
+                        <div class="text-[11px] text-slate-500 font-mono">` + item.email + `</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <div class="font-semibold text-slate-700">` + item.profession + `</div>
+                        <div class="text-[11px] font-mono text-slate-400">` + item.str + `</div>
+                        <div>` + strBadge + `</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <div class="font-mono font-bold text-slate-800 text-xs">` + item.sipNo + `</div>
+                        <div class="text-[11px] text-slate-500">` + item.hospital + `</div>
+                    </td>
+                    <td class="py-4 px-4 font-mono text-xs text-slate-700">
+                        ` + item.expiry + `
+                    </td>
+                    <td class="py-4 px-4">
+                        <div>` + statusBadge + `</div>
+                        <div>` + docBadge + `</div>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button onclick="openDocReviewModalById(` + item.id + `)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition" title="Review & Dokumen">
+                            <i class="fa-solid fa-eye mr-1"></i> Berkas
+                        </button>
+                        ` + (currentSession && currentSession.role === 'admin' ? `
+                            <button onclick="openEditSipModal(` + item.id + `)" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition" title="Edit Data">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteSipData(` + item.id + `)" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition" title="Hapus Data">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        ` : '') + `
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderUserManagementTable(tbody) {
+            if (registeredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-slate-400">Belum ada akun pengguna yang terdaftar.</td></tr>';
+                return;
+            }
+
+            registeredUsers.forEach(function(u) {
+                var statusBadge = u.status === 'Aktif' 
+                    ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle text-[8px] mr-1 text-emerald-500"></i> Aktif (Online)</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200"><i class="fa-solid fa-circle text-[8px] mr-1 text-slate-400"></i> Tidak Aktif</span>';
+
+                var roleBadge = u.role === 'admin'
+                    ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Admin Puskesmas</span>'
+                    : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">Tenaga Kesehatan</span>';
+
+                var row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50 transition';
+                row.innerHTML = `
+                    <td class="py-4 px-6">
+                        <div class="font-bold text-slate-900">` + u.name + `</div>
+                        <div class="text-[11px] text-slate-500 font-mono">` + u.email + `</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <div>` + roleBadge + `</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <div>` + statusBadge + `</div>
+                    </td>
+                    <td class="py-4 px-4 text-xs font-mono text-slate-600">
+                        <div class="flex items-center space-x-1.5">
+                            <i class="fa-regular fa-clock text-slate-400"></i>
+                            <span>` + u.lastLogin + `</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button onclick="toggleUserStatus(` + u.id + `)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                            Ubah Status
+                        </button>
+                        <button onclick="deleteUserAccount(` + u.id + `)" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition" title="Hapus Akun">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function toggleUserStatus(id) {
+            var u = registeredUsers.find(function(user) { return user.id === id; });
+            if (u) {
+                u.status = u.status === 'Aktif' ? 'Tidak Aktif' : 'Aktif';
+                renderNakesTable();
+                showModal('Status Diperbarui', 'Status akun ' + u.name + ' berhasil diubah menjadi ' + u.status + '.', 'success');
+            }
+        }
+
+        function deleteUserAccount(id) {
+            var idx = registeredUsers.findIndex(function(user) { return user.id === id; });
+            if (idx !== -1) {
+                registeredUsers.splice(idx, 1);
+                renderNakesTable();
+                showModal('Akun Dihapus', 'Akun pengguna berhasil dihapus dari sistem.', 'info');
+            }
+        }
+
+        function filterNakesTable() {
+            renderNakesTable();
+        }
+
+        function updateStatistics() {
+            var listToCheck = nakesData;
+            if (currentSession && currentSession.role === 'nakes') {
+                listToCheck = nakesData.filter(function(i) { return i.email.toLowerCase() === currentSession.identifier.toLowerCase(); });
+            }
+
+            var total = listToCheck.length;
+            var active = listToCheck.filter(function(i) { return i.status === 'Aktif'; }).length;
+            var pending = listToCheck.filter(function(i) { return i.status === 'Menunggu Verifikasi'; }).length;
+            var expired = listToCheck.filter(function(i) { return i.status === 'Kedaluwarsa'; }).length;
+
+            if (document.getElementById('statTotalNakes')) document.getElementById('statTotalNakes').textContent = total;
+            if (document.getElementById('statActiveSip')) document.getElementById('statActiveSip').textContent = active;
+            if (document.getElementById('statPendingSip')) document.getElementById('statPendingSip').textContent = pending;
+            if (document.getElementById('statExpiredSip')) document.getElementById('statExpiredSip').textContent = expired;
+        }
+
+        function openDocReviewModalById(id) {
+            var item = nakesData.find(function(n) { return n.id === id; });
+            if (!item) return;
+            activeReviewIndex = id;
+
+            document.getElementById('modalDocTitle').textContent = "Review Berkas SIP - " + item.name;
+            document.getElementById('modalDocSub').textContent = "Nomor STR: " + item.str;
+            document.getElementById('previewName').textContent = item.name;
+            document.getElementById('previewProfession').textContent = item.profession;
+            document.getElementById('previewStr').textContent = item.str + " (" + (item.strStatus || "Aktif") + ")";
+            document.getElementById('previewSip').textContent = item.sipNo;
+            document.getElementById('previewFileName').textContent = item.fileName || "Lampiran_Berkas_SIP.pdf";
+
+            var actionsDiv = document.getElementById('modalReviewActions');
+            if (currentSession && currentSession.role === 'admin') {
+                actionsDiv.style.display = 'flex';
+            } else {
+                actionsDiv.style.display = 'none';
+            }
+
+            document.getElementById('docReviewModal').classList.remove('hidden');
+        }
+
+        function closeDocReviewModal() {
+            document.getElementById('docReviewModal').classList.add('hidden');
+            activeReviewIndex = null;
+        }
+
+        function downloadActiveDocument() {
+            var item = nakesData.find(function(n) { return n.id === activeReviewIndex; });
+            var fileNameToDownload = item && item.fileName ? item.fileName : "Dokumen_SIP_Puskesmas.pdf";
+            
+            var fileContent = "SURAT IZIN PRAKTIK (SIP) & STR RESMI\n" +
+                              "UPT PUSKESMAS KEMILING KOTA BANDAR LAMPUNG\n" +
+                              "=========================================\n" +
+                              "Nama Pemohon : " + (item ? item.name : "Nakes") + "\n" +
+                              "Profesi      : " + (item ? item.profession : "-") + "\n" +
+                              "Nomor STR    : " + (item ? item.str : "-") + " [" + (item ? item.strStatus : "Aktif") + "]\n" +
+                              "Nomor SIP    : " + (item ? item.sipNo : "-") + "\n" +
+                              "Masa Berlaku : " + (item ? item.expiry : "-") + "\n" +
+                              "Status Berkas: Tervalidasi & Sah\n" +
+                              "=========================================\n" +
+                              "File asli diunggah sesuai arsip digital: " + fileNameToDownload;
+
+            var blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileNameToDownload;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showModal('Unduh Berkas', 'File lampiran "' + fileNameToDownload + '" berhasil diunduh.', 'success');
+        }
+
+        function approveDocumentFromModal() {
+            if (!activeReviewIndex) return;
+            var item = nakesData.find(function(n) { return n.id === activeReviewIndex; });
+            if (item) {
+                item.status = 'Aktif';
+                item.docStatus = 'Tervalidasi';
+            }
+            closeDocReviewModal();
+            renderNakesTable();
+            updateStatistics();
+            showModal('Validasi Berhasil', 'SIP untuk ' + (item ? item.name : '') + ' berhasil divalidasi dan disetujui.', 'success');
+        }
+
+        function rejectDocumentFromModal() {
+            if (!activeReviewIndex) return;
+            var item = nakesData.find(function(n) { return n.id === activeReviewIndex; });
+            if (item) {
+                item.status = 'Kedaluwarsa';
+                item.docStatus = 'Perlu Perbaikan';
+            }
+            closeDocReviewModal();
+            renderNakesTable();
+            updateStatistics();
+            showModal('Catatan Perbaikan', 'Status dokumen ditandai memerlukan perbaikan berkas oleh pemohon.', 'warning');
+        }
+
+        function openAddModal() {
+            document.getElementById('sipModalTitle').textContent = currentSession && currentSession.role === 'nakes' ? 'Pengajuan / Perpanjangan SIP Mandiri' : 'Tambah Data SIP Baru';
+            document.getElementById('editNakesId').value = '';
+            document.getElementById('inputName').value = currentSession && currentSession.role === 'nakes' ? currentSession.name : '';
+            document.getElementById('inputStr').value = currentSession && currentSession.role === 'nakes' ? currentSession.str : '';
+            document.getElementById('inputProfession').value = currentSession && currentSession.role === 'nakes' ? (currentSession.profession || 'Dokter Umum') : 'Dokter Umum';
+            document.getElementById('inputSipNo').value = '';
+            document.getElementById('inputExpiry').value = '';
+            document.getElementById('inputEmail').value = currentSession ? currentSession.identifier : '';
+            document.getElementById('sipModal').classList.remove('hidden');
+        }
+
+        function openEditSipModal(id) {
+            var item = nakesData.find(function(n) { return n.id === id; });
+            if (!item) return;
+
+            document.getElementById('sipModalTitle').textContent = 'Edit Data SIP Nakes';
+            document.getElementById('editNakesId').value = item.id;
+            document.getElementById('inputName').value = item.name;
+            document.getElementById('inputStr').value = item.str;
+            document.getElementById('inputProfession').value = item.profession;
+            document.getElementById('inputSipNo').value = item.sipNo;
+            document.getElementById('inputExpiry').value = item.expiry;
+            document.getElementById('inputEmail').value = item.email;
+            document.getElementById('sipModal').classList.remove('hidden');
+        }
+
+        function closeSipModal() {
+            document.getElementById('sipModal').classList.add('hidden');
+        }
+
+        function handleSipFormSubmit(event) {
+            event.preventDefault();
+            var editId = document.getElementById('editNakesId').value;
+            var name = document.getElementById('inputName').value.trim();
+            var str = document.getElementById('inputStr').value.trim();
+            var profession = document.getElementById('inputProfession').value;
+            var sipNo = document.getElementById('inputSipNo').value.trim();
+            var expiry = document.getElementById('inputExpiry').value;
+            var email = document.getElementById('inputEmail').value.trim();
+            var fileInput = document.getElementById('inputFileUpload');
+            var uploadedFileName = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0].name : "Dokumen_SIP_Puskesmas.pdf";
+
+            if (editId) {
+                var item = nakesData.find(function(n) { return n.id == editId; });
+                if (item) {
+                    item.name = name;
+                    item.str = str;
+                    item.profession = profession;
+                    item.sipNo = sipNo;
+                    item.expiry = expiry;
+                    item.email = email;
+                    if (fileInput && fileInput.files && fileInput.files[0]) {
+                        item.fileName = uploadedFileName;
+                    }
+                }
+                showModal('Pembaruan Berhasil', 'Data SIP berhasil diperbarui.', 'success');
+            } else {
+                var newId = nakesData.length > 0 ? Math.max.apply(null, nakesData.map(function(n) { return n.id; })) + 1 : 1;
+                nakesData.push({
+                    id: newId,
+                    name: name,
+                    str: str,
+                    strStatus: "Aktif (Sah)",
+                    profession: profession,
+                    sipNo: sipNo,
+                    hospital: "UPT Puskesmas Kemiling",
+                    expiry: expiry,
+                    status: currentSession.role === 'admin' ? 'Aktif' : 'Menunggu Verifikasi',
+                    email: email,
+                    fileName: uploadedFileName,
+                    docStatus: currentSession.role === 'admin' ? 'Tervalidasi' : 'Menunggu Review'
+                });
+                showModal('Pengajuan Berhasil', 'Data SIP berhasil diajukan ke sistem Puskesmas Kemiling.', 'success');
+            }
+
+            closeSipModal();
+            renderNakesTable();
+            updateStatistics();
+        }
+
+        function deleteSipData(id) {
+            var idx = nakesData.findIndex(function(n) { return n.id === id; });
+            if (idx !== -1) {
+                nakesData.splice(idx, 1);
+                renderNakesTable();
+                updateStatistics();
+                showModal('Data Dihapus', 'Data SIP berhasil dihapus dari sistem.', 'info');
+            }
+        }
+
+        function showModal(title, message, type) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            var iconBox = document.getElementById('modalIconBox');
+            
+            if (type === 'warning' || type === 'error') {
+                iconBox.className = "w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold";
+                iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else if (type === 'success') {
+                iconBox.className = "w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold";
+                iconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                iconBox.className = "w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold";
+                iconBox.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            document.getElementById('appModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('appModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
